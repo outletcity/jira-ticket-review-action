@@ -1,4 +1,4 @@
-# Jira ticket fixversion check action
+# Jira ticket review action
 
 This action match the Jira issue fixversion and a PR target branch.
 
@@ -6,12 +6,18 @@ This action match the Jira issue fixversion and a PR target branch.
 ## `GITHUB_TOKEN`
 
 **Required** Github Token.
-## `NOT_FOUND_MESSAGE`
+## `REQUEST_CHANGE_LABEL_NAME`
 
-Comment message when no Fixversion found in Jira issue.
+Label name for change request.
+## `APPROVED_LABEL_NAME`
+
+Label name for change request.
+## `JIRA_WORKFLOW_ID`
+
+Workflow id to transition on request changes.
 ## `JIRA_ISSUE_REGEX`
 
-Comment message when no Fixversion found in Jira issue.
+Label name for approved reviews.
 ## `JIRA_URL`
 
 **Required** Jira URL.
@@ -24,20 +30,23 @@ Comment message when no Fixversion found in Jira issue.
 
 ## Example usage
 ```
-name: 'Check Fixversion'
+name: 'Check Review'
 on:
-  pull_request
+  pull_request_review:
+    types: [submitted]
 jobs:
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: bashess/jira-ticket-version-check-action@v1.1
+      - uses: holy-ag/jira-ticket-review-action
         with:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          NOT_FOUND_MESSAGE: "Keine Jira Ticket Version angegeben, bitte prüfen!"
           JIRA_ISSUE_REGEX: '.*(PREFIX-\d+).*'
           JIRA_URL: ${{secrets.JIRA_URL}}
           JIRA_USER: ${{secrets.JIRA_USER}}
           JIRA_PASSWORD: ${{secrets.JIRA_PASSWORD}}
+          JIRA_WORKFLOW_ID: 'JIRA_WORKFLOW_ID'
+          REQUEST_CHANGE_LABEL_NAME: 'LABEL_NAME'
+          APPROVED_LABEL_NAME: 'LABEL_NAME'
 ```

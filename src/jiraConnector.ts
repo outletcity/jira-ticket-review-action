@@ -1,12 +1,13 @@
-import JiraApi from 'jira-client'
+/* eslint-disable no-console */
+import JiraApi, {IssueObject} from 'jira-client'
 import {getInputs} from './inputs'
 
 export class JiraConnector {
   private jira: JiraApi
-  // private jiraIssue: string
+  private issueKey: string
 
-  constructor() {
-    const {JIRA_URL, JIRA_USER, JIRA_PASSWORD} = getInputs()
+  constructor(prSourceBranch: string) {
+    const {JIRA_URL, JIRA_USER, JIRA_PASSWORD, JIRA_ISSUE_REGEX} = getInputs()
 
     this.jira = new JiraApi({
       protocol: 'https',
@@ -16,34 +17,58 @@ export class JiraConnector {
       apiVersion: '2',
       strictSSL: true
     })
-  }
 
-  setIssueCodeFromBranch(branchName: string): string {
-    const {JIRA_ISSUE_REGEX} = getInputs()
     if (JIRA_ISSUE_REGEX) {
       const customRegex = new RegExp(JIRA_ISSUE_REGEX)
-      const issueKey = branchName.match(customRegex)
-      return issueKey && issueKey[1] ? issueKey[1] : branchName
-    }
-    return branchName
-  }
-
-  async getfixVersionFromTicket(issueKey: string): Promise<string> {
-    try {
-      const issue = await this.jira.findIssue(issueKey)
-      return issue?.fields?.fixVersions[0]?.name
-    } catch (error) {
-      return Promise.reject(error)
+      const issueKey = prSourceBranch.match(customRegex)
+      this.issueKey = issueKey && issueKey[1] ? issueKey[1] : ''
+    } else {
+      this.issueKey = prSourceBranch
     }
   }
 
-  isMatchedVersion(fixVersion: string, targetBranch: string): boolean {
-    if (!fixVersion.includes('/')) {
-      const rawBranch = targetBranch.split('/')
-      if (rawBranch.length === 2) {
-        return fixVersion === rawBranch[1]
+  getIssueKey(): string {
+    return this.issueKey
+  }
+
+  private async setLabel(label: string): Promise<void> {
+    const {
+      APPROVED_LABEL_NAME,
+      REQUEST_CHANGE_LABEL_NAME,
+      JIRA_WORKFLOW_ID
+    } = getInputs()
+
+    const removeLabelQuery: IssueObject = {
+      update: {
+        labels: [
+          {remove: APPROVED_LABEL_NAME},
+          {remove: REQUEST_CHANGE_LABEL_NAME}
+        ]
       }
     }
-    return fixVersion === targetBranch
+    try {
+      await this.jira.updateIssue(this.issueKey, removeLabelQuery)
+      const addLabelQuery: IssueObject = {update: {labels: [{add: label}]}}
+      await this.jira.updateIssue(this.issueKey, addLabelQuery)
+      if (label === REQUEST_CHANGE_LABEL_NAME && JIRA_WORKFLOW_ID) {
+        const transitionQuery: IssueObject = {
+          transition: {id: JIRA_WORKFLOW_ID}
+        }
+        await this.jira.transitionIssue(this.issueKey, transitionQuery)
+      }
+    } catch (error) {
+      console.log('error: ', error)
+      // return Promise.reject(error)
+    }
+  }
+
+  async setApprovedLabel(): Promise<void> {
+    const {APPROVED_LABEL_NAME} = getInputs()
+    return await this.setLabel(APPROVED_LABEL_NAME)
+  }
+
+  async setChangeRequestLabel(): Promise<void> {
+    const {REQUEST_CHANGE_LABEL_NAME} = getInputs()
+    return await this.setLabel(REQUEST_CHANGE_LABEL_NAME)
   }
 }

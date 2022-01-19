@@ -1,4 +1,4 @@
-name: 'Check Fixversion'
+name: 'Check Review'
 on: # rebuild any PRs and main branch changes
   pull_request_review:
     types: [submitted]
@@ -14,3 +14,4 @@ jobs:
           JIRA_URL: ${{secrets.JIRA_URL}}
           JIRA_USER: ${{secrets.JIRA_USER}}
           JIRA_PASSWORD: ${{secrets.JIRA_PASSWORD}}
+          JIRA_WORKFLOW_ID: '61'

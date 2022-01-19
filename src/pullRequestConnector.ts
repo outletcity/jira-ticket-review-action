@@ -1,11 +1,9 @@
-/* eslint-disable no-console */
 import {getInputs} from './inputs'
 import * as github from '@actions/github'
 import {Context} from '@actions/github/lib/context'
 import {Octokit} from '@octokit/core'
 import {Api} from '@octokit/plugin-rest-endpoint-methods/dist-types/types'
 import {PaginateInterface} from '@octokit/plugin-paginate-rest'
-import {WebhookPayload} from '@actions/github/lib/interfaces'
 
 export class PullRequestConnector {
   context: Context
@@ -21,37 +19,16 @@ export class PullRequestConnector {
     this.context = context
   }
 
-  get review(): WebhookPayload['pull_request_review'] {
-    const {review} = this.context.payload
-    console.log(review.status)
-    return review
-  }
-
   get reviewApproved(): boolean {
-    return this.review?.state === 'APPROVED'
+    return this.context.payload.review.state === 'approved'
   }
 
   get reviewChangeRequest(): boolean {
-    return this.review?.state === ''
+    return this.context.payload.review.state === 'changes_requested'
   }
 
-  // /**
-  //  * @throws {Error}
-  //  */
-  // async writeComment(): Promise<void> {
-  //   const {NOT_FOUND_MESSAGE} = getInputs()
-
-  //   const prNumber = this.pullRequest?.number
-
-  //   if (prNumber === undefined) {
-  //     throw new Error('This action should only run on PR')
-  //   }
-
-  //   await this.octokit.rest.issues.createComment({
-  //     ...this.context.repo,
-  //     issue_number: prNumber,
-  //     body: NOT_FOUND_MESSAGE
-  //   })
-  //   console.log('Comment: ', NOT_FOUND_MESSAGE)
-  // }
+  get sourceBranch(): string | undefined {
+    const {pull_request} = this.context.payload
+    return pull_request?.head.ref
+  }
 }

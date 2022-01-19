@@ -17,14 +17,17 @@ inputs:
   GITHUB_TOKEN: 
       description: 'Github token'
       required: true
+  JIRA_WORKFLOW_ID: 
+      description: 'Workflow id to transition on request changes'
+      required: false
   REQUEST_CHANGE_LABEL_NAME:
       description: 'Label name for change request'
       required: false
-      default: 'review change request'
+      default: 'review-change-request'
   APPROVED_LABEL_NAME:
       description: 'Label name for approved reviews'
       required: false
-      default: 'review approved'
+      default: 'review-approved'
 runs:
   using: 'node12'
   main: 'dist/index.js'
