@@ -29,7 +29,7 @@
     "jira-client": "^6.22.0"
   },
   "devDependencies": {
-    "@types/jira-client": "^6.21.3",
+    "@types/jira-client": "^7.1.4",
     "@types/node": "^16.3.3",
     "@typescript-eslint/parser": "^4.28.3",
     "@vercel/ncc": "^0.29.0",
