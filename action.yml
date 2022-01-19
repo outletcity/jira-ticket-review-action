@@ -1,0 +1,30 @@
+name: 'Jira ticket review labels'
+description: 'Add labels to jira tickets on review result'
+author: 'Bastian Hess'
+inputs:
+  JIRA_ISSUE_REGEX: 
+      description: 'Jira issue regex'
+      required: false
+  JIRA_URL: 
+      description: 'Jira URL'
+      required: true
+  JIRA_USER: 
+      description: 'Jira username'
+      required: true
+  JIRA_PASSWORD: 
+      description: 'Jira password'
+      required: true
+  GITHUB_TOKEN: 
+      description: 'Github token'
+      required: true
+  REQUEST_CHANGE_LABEL_NAME:
+      description: 'Label name for change request'
+      required: false
+      default: 'review change request'
+  APPROVED_LABEL_NAME:
+      description: 'Label name for approved reviews'
+      required: false
+      default: 'review approved'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
