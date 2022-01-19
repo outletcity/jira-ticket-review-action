@@ -1,28 +1,35 @@
 /* eslint-disable no-console */
 import * as core from '@actions/core'
 import {PullRequestConnector} from './pullRequestConnector'
-// import {JiraConnector} from './jiraConnector'
+import {JiraConnector} from './jiraConnector'
 
 async function run(): Promise<void> {
   try {
     const pullRequestConnector = new PullRequestConnector()
-    // const jiraConnector = new JiraConnector()
+    const {
+      reviewApproved,
+      reviewChangeRequest,
+      sourceBranch
+    } = pullRequestConnector
 
-    const {reviewApproved, reviewChangeRequest} = pullRequestConnector
+    if (!sourceBranch) {
+      process.exit(0)
+    }
+
+    const jiraConnector = new JiraConnector(sourceBranch)
+    const issueKey = jiraConnector.getIssueKey()
     console.log('reviewChangeRequest:', reviewChangeRequest)
     console.log('reviewApproved:', reviewApproved)
 
-    // if (reviewApproved) {
-    //   jiraConnector.setApprovedLabel()
-    //   console.log(`Review approved label set`)
-    //   process.exit(0)
-    // }
+    if (issueKey && reviewApproved) {
+      await jiraConnector.setApprovedLabel()
+      console.log(`Review approved label set`)
+    }
 
-    // if (reviewChangeRequest) {
-    //   jiraConnector.setChangeRequestLabel()
-    //   console.log(`Review change request label set`)
-    //   process.exit(0)
-    // }
+    if (issueKey && reviewChangeRequest) {
+      await jiraConnector.setChangeRequestLabel()
+      console.log(`Review change request label set`)
+    }
 
     process.exit(0)
   } catch (error) {
