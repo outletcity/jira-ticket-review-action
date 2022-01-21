@@ -57,6 +57,7 @@ export class JiraConnector {
         await this.jira.transitionIssue(this.issueKey, transitionQuery)
       }
     } catch (error) {
+      console.log('error')
       console.log('error: ', error)
       // return Promise.reject(error)
     }
