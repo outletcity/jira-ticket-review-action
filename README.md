@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: holy-ag/jira-ticket-review-action
+      - uses: outletcity/jira-ticket-review-action
         with:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           JIRA_ISSUE_REGEX: '.*(PREFIX-\d+).*'
